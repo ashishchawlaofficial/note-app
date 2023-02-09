@@ -1,23 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import Authenticate from "./components/auth/Authenticate";
+import Home from "./components/pages/Home";
+import Protected from "./components/auth/Protected";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { setUser } from "./store/slices/AuthSlice";
+import { auth } from "./firebase-config";
+import { onAuthStateChanged } from "firebase/auth";
 
 function App() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const locFrom = location.state ? location.state?.from : "/";
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          dispatch(setUser({ user, isLoggedIn: true }));
+          navigate(locFrom);
+        }
+      });
+    }
+  }, [dispatch, isLoggedIn, navigate, locFrom]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Routes>
+        <Route path="auth" element={<Authenticate />} />
+        <Route element={<Protected />}>
+          <Route path="/" element={<Home />} />
+        </Route>
+      </Routes>
     </div>
   );
 }
