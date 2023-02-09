@@ -9,14 +9,8 @@ export const avatarName = (name) => {
 };
 
 // Function to generate dynamic endpoint url
-export const useApiEndpoint = (data) => {
-  const { builderId, userId, endpointKey, isFormData = false } = data;
-  const endpoint = isFormData
-    ? `${process.env.REACT_APP_DB_URL}/users/${userId}/resume/${builderId}/${endpointKey}.json`
-    : `${process.env.REACT_APP_DB_URL}/users/${userId}/${endpointKey}.json`;
-
-  return endpoint;
-};
+export const useApiEndpoint = (userId, endpointKey) =>
+  `${process.env.REACT_APP_DB_URL}/users/${userId}/notes/${endpointKey}.json`;
 
 // Flatten Firebase response
 export const flattenResponse = (data) => {

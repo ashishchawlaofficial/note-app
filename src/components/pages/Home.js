@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Drawer, useMantineTheme } from "@mantine/core";
 import Layout from "../Layout/Layout";
 import Empty from "../common/Empty";
+import NewNote from "../note/NewNote";
 
 const Home = () => {
   const [opened, setOpened] = useState(false);
@@ -21,7 +22,7 @@ const Home = () => {
         onClose={() => setOpened(false)}
         position="right"
       >
-        {/* Drawer content */}
+        <NewNote />
       </Drawer>
     </Layout>
   );

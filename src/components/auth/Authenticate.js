@@ -1,7 +1,7 @@
-import * as Yup from "yup";
+import { loginSchema } from "../../utils/YupSchema";
 import { useToggle, upperFirst } from "@mantine/hooks";
 import { useForm, yupResolver } from "@mantine/form";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   TextInput,
@@ -14,27 +14,7 @@ import {
   Stack,
   Box,
 } from "@mantine/core";
-// import { IoLogoGoogle, IoLogoGithub } from "react-icons/io";
 import { signInUser, signUpUser } from "../../store/slices/AuthSlice";
-
-// Yup Login Schema
-const loginSchema = Yup.object().shape(
-  {
-    name: Yup.string().when("isRegister", {
-      is: true,
-      then: (rule) =>
-        rule
-          .min(2, "Name should have atleast 2 characters")
-          .required("Name is required"),
-    }),
-    email: Yup.string().email("Invalid Email").required("Email is required"),
-    password: Yup.string()
-      .min(6, "Password should be of minimum 6 characters")
-      .required("Password is required"),
-    isRegister: Yup.boolean(),
-  },
-  ["isRegister", "isRegister"]
-);
 
 // Auth Component
 const Auth = (props) => {
@@ -43,7 +23,6 @@ const Auth = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  // const { user, error } = useSelector((state) => state.auth);
 
   // useForm hook to store the form field values
   const form = useForm({
