@@ -60,7 +60,7 @@ const Notes = ({ notes, handleSideSheet, userID, accessToken }) => {
     dispatch(deleteNote(id, userID, accessToken));
   };
 
-  const handleEdit = (id) => {};
+  // const handleEdit = (id) => {};
 
   return (
     <Box mt={30}>

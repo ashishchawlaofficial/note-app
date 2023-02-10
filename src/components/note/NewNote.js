@@ -39,7 +39,7 @@ const NewNote = ({ handleSideSheet }) => {
   const dispatch = useDispatch();
   const userID = sessionStorage.getItem("userId");
   const { user } = useSelector((state) => state.auth);
-  const { data, loading, error } = useSelector((state) => state.notes);
+  const { loading, error } = useSelector((state) => state.notes);
 
   // useForm hook to store the form field values
   const form = useForm({
