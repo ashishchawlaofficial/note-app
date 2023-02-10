@@ -23,5 +23,5 @@ export const loginSchema = Yup.object().shape(
 export const noteSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   content: Yup.string(),
-  Tags: Yup.string(),
+  category: Yup.string().required("Please select a category"),
 });

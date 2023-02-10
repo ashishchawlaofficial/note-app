@@ -1,16 +1,45 @@
-// import { useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { useForm, yupResolver } from "@mantine/form";
-import { useDispatch } from "react-redux";
-import { TextInput, Button, Stack, Box, Text } from "@mantine/core";
-
+import { useDispatch, useSelector } from "react-redux";
+// prettier-ignore
+import { TextInput, Button, Stack, Box, Text, Select, Group, ActionIcon } from "@mantine/core";
 import { noteSchema } from "../../utils/YupSchema";
 import TextEditor from "../common/TextEditor";
 import { isEmptyObj } from "../../utils/Functions";
 import { postData, getData } from "../../store/slices/noteSlice";
+import { BsFillCircleFill, BsFillArrowRightCircleFill } from "react-icons/bs";
+import { notifyOnSave } from "../../utils/Notifications";
 
-const NewNote = () => {
+// Categories data for select
+const categories = [
+  {
+    value: "Uncategorized",
+    label: "Uncategorized",
+    icon: <BsFillCircleFill />,
+    color: "gray",
+  },
+  { value: "Blue", label: "Blue", icon: <BsFillCircleFill />, color: "blue" },
+  {
+    value: "Green",
+    label: "Green",
+    icon: <BsFillCircleFill />,
+    color: "green",
+  },
+  { value: "Red", label: "Red", icon: <BsFillCircleFill />, color: "red" },
+  {
+    value: "Orange",
+    label: "Orange",
+    icon: <BsFillCircleFill />,
+    color: "orange",
+  },
+];
+
+const NewNote = ({ handleSideSheet }) => {
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const dispatch = useDispatch();
   const userID = sessionStorage.getItem("userId");
+  const { user } = useSelector((state) => state.auth);
+  const { data, loading, error } = useSelector((state) => state.notes);
 
   // useForm hook to store the form field values
   const form = useForm({
@@ -23,11 +52,40 @@ const NewNote = () => {
     },
   });
 
+  const SelectItem = forwardRef(({ icon, value, color, ...others }, ref) => (
+    <div ref={ref} {...others}>
+      <Group noWrap>
+        <ActionIcon color={color}>{icon}</ActionIcon>
+
+        <Text size="sm">{value}</Text>
+      </Group>
+    </div>
+  ));
+
   const handleSubmit = (values) => {
     console.log(values, form.values.category);
     console.log(isEmptyObj(values));
-    if (!isEmptyObj(values)) dispatch(postData(values, userID));
+    if (!isEmptyObj(values)) {
+      dispatch(postData(values, userID, user.accessToken));
+      setIsSubmitted(true);
+      handleSideSheet(false);
+      form.reset();
+    }
   };
+
+  useEffect(() => {
+    if (loading !== "pending" && error) {
+      notifyOnSave("error");
+    }
+    if (isSubmitted && loading !== "pending" && !error) {
+      notifyOnSave("success", "Note has been saved successfully.");
+      setIsSubmitted(false);
+    }
+  }, [error, loading, isSubmitted]);
+
+  useEffect(() => {
+    user?.accessToken && dispatch(getData(user.uid, user.accessToken));
+  }, [user.uid, user.accessToken, dispatch, user]);
 
   return (
     <Box>
@@ -46,17 +104,31 @@ const NewNote = () => {
             <TextEditor
               placeholder="Enter some text"
               onChange={form.setValues}
-              content={form.values.content}
+              content={form.values?.content}
               name="content"
             />
           </Stack>
-          <TextInput
+          <Select
+            withAsterisk
             label="Category"
-            placeholder="Add a cotegory (only 1)"
+            placeholder="Select Category"
+            searchable
+            nothingFound="Category not found"
+            data={categories}
+            itemComponent={SelectItem}
+            filter={(value, item) =>
+              item.label.toLowerCase().includes(value.toLowerCase().trim())
+            }
             {...form.getInputProps("category")}
+            defaultValue={categories[0].value}
           />
         </Stack>
-        <Button color="indigo" type="submit" mt={20}>
+        <Button
+          color="indigo"
+          type="submit"
+          mt={20}
+          leftIcon={<BsFillArrowRightCircleFill />}
+        >
           Save
         </Button>
       </form>

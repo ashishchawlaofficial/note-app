@@ -1,16 +1,40 @@
-import { useState } from "react";
-import { Drawer, useMantineTheme } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { Container, Drawer, useMantineTheme } from "@mantine/core";
 import Layout from "../Layout/Layout";
 import Empty from "../common/Empty";
 import NewNote from "../note/NewNote";
+import { useSelector, useDispatch } from "react-redux";
+import { getData } from "../../store/slices/noteSlice";
+import { isEmptyArray } from "../../utils/Functions";
+import Notes from "../note/Notes";
 
 const Home = () => {
   const [opened, setOpened] = useState(false);
   const theme = useMantineTheme();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { data, loading, error } = useSelector((state) => state.notes);
+
+  useEffect(() => {
+    user?.accessToken && dispatch(getData(user.uid, user.accessToken));
+  }, [user.uid, user.accessToken, dispatch, user]);
+
+  console.log(data, loading, error);
 
   return (
     <Layout>
-      <Empty handleSideSheet={setOpened} />
+      <Container size="xl">
+        {isEmptyArray(data) ? (
+          <Empty handleSideSheet={setOpened} />
+        ) : (
+          <Notes
+            notes={data}
+            handleSideSheet={setOpened}
+            userID={user.uid}
+            accessToken={user.accessToken}
+          />
+        )}
+      </Container>
       <Drawer
         overlayColor={theme.colors.gray[2]}
         overlayOpacity={0.55}
@@ -22,7 +46,7 @@ const Home = () => {
         onClose={() => setOpened(false)}
         position="right"
       >
-        <NewNote />
+        <NewNote handleSideSheet={setOpened} />
       </Drawer>
     </Layout>
   );

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { useApiEndpoint } from "../../utils/Functions";
+import { useApiEndpoint, flattenResponse } from "../../utils/Functions";
 
 const initialState = {
   loading: "idle",
@@ -17,10 +17,17 @@ const noteSlice = createSlice({
     },
     setData: (state, action) => {
       state.data = [...state.data, action.payload];
+      state.error = "";
       if (state.loading === "pending") state.loading = "idle";
     },
-    setCategory: (state, action) => {
-      state.category = [...state.category, action.payload];
+    updateData: (state, action) => {
+      state.data = action.payload;
+      state.error = "";
+      if (state.loading === "pending") state.loading = "idle";
+    },
+    deleteRecord: (state, action) => {
+      state.data = state.data.filter((item) => item.id !== action.payload);
+      state.error = "";
       if (state.loading === "pending") state.loading = "idle";
     },
     setError: (state, action) => {
@@ -30,15 +37,16 @@ const noteSlice = createSlice({
   },
 });
 
-export const { setLoader, setData, setCategory, setError } = noteSlice.actions;
+export const { setLoader, setData, setError, updateData, deleteRecord } =
+  noteSlice.actions;
 
 export default noteSlice.reducer;
 
 // Async Thunk Functions
 
-export const postData = (data, userID) => async (dispatch) => {
+export const postData = (data, userID, accessToken) => async (dispatch) => {
   dispatch(setLoader());
-  const endpoint = useApiEndpoint(userID, "items");
+  const endpoint = useApiEndpoint(userID, "items", accessToken);
 
   try {
     const request = await fetch(endpoint, {
@@ -62,16 +70,16 @@ export const postData = (data, userID) => async (dispatch) => {
   }
 };
 
-export const getData = (userID) => async (dispatch) => {
+export const getData = (userID, accessToken) => async (dispatch) => {
   dispatch(setLoader());
-  const endpoint = useApiEndpoint(userID, "items");
+  const endpoint = useApiEndpoint(userID, "items", accessToken);
 
   try {
     const request = await fetch(endpoint);
 
     if (request.ok) {
-      const response = request.json();
-      dispatch(setData(response));
+      const response = await request.json();
+      dispatch(updateData(flattenResponse(response)));
     } else {
       throw new Error({
         statusCode: request.status,
@@ -82,3 +90,48 @@ export const getData = (userID) => async (dispatch) => {
     dispatch(setError(err.message));
   }
 };
+
+export const deleteNote = (noteID, userID, accessToken) => async (dispatch) => {
+  dispatch(setLoader());
+  const endpoint = useApiEndpoint(userID, `items/${noteID}`, accessToken);
+
+  try {
+    const request = await fetch(endpoint, { method: "DELETE" });
+
+    if (request.ok) {
+      dispatch(deleteRecord(noteID));
+    } else {
+      throw new Error({
+        statusCode: request.status,
+        message: request.statusText,
+      });
+    }
+  } catch (err) {
+    dispatch(setError(err.message));
+  }
+};
+
+export const editNote =
+  (noteID, data, userID, accessToken) => async (dispatch) => {
+    dispatch(setLoader());
+    const endpoint = useApiEndpoint(userID, `items/${noteID}`, accessToken);
+
+    try {
+      const request = await fetch(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+
+      if (request.ok) {
+        const response = await request.json();
+        dispatch(updateData(flattenResponse(response)));
+      } else {
+        throw new Error({
+          statusCode: request.status,
+          message: request.statusText,
+        });
+      }
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
+  };

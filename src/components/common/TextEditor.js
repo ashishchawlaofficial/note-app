@@ -22,7 +22,7 @@ const TextEditor = ({ placeholder, onChange, ...rest }) => {
   });
 
   return (
-    <RichTextEditor editor={editor} style={{ height: "200px" }} {...rest}>
+    <RichTextEditor editor={editor} style={{ minHeight: "200px" }} {...rest}>
       <RichTextEditor.Toolbar>
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />

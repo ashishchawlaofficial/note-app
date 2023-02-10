@@ -9,13 +9,13 @@ export const avatarName = (name) => {
 };
 
 // Function to generate dynamic endpoint url
-export const useApiEndpoint = (userId, endpointKey) =>
-  `${process.env.REACT_APP_DB_URL}/users/${userId}/notes/${endpointKey}.json`;
+export const useApiEndpoint = (userId, endpointKey, accessToken) =>
+  `${process.env.REACT_APP_DB_URL}/users/${userId}/notes/${endpointKey}.json?auth=${accessToken}`;
 
 // Flatten Firebase response
 export const flattenResponse = (data) => {
-  const result = Object.entries(data).map((item) => {
-    return { ...item[item.length - 1], id: item[0] };
+  const result = Object.entries(data).map(([key, item]) => {
+    return { ...item, id: key };
   });
 
   return result;
@@ -39,3 +39,7 @@ export const objToArrObj = (data) => {
 export const isEmptyObj = (obj) => Object.keys(obj).length === 0;
 // Checks if an array is empty
 export const isEmptyArray = (arr) => arr.length === 0;
+
+// contentShortner
+export const contentShortner = (content, limit) =>
+  content.slice(0, limit).concat("[...]");
