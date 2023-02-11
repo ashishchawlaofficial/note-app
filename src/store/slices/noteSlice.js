@@ -30,6 +30,14 @@ const noteSlice = createSlice({
       state.error = "";
       if (state.loading === "pending") state.loading = "idle";
     },
+    editData: (state, action) => {
+      const editedItemIndex = state.data.findIndex(
+        (item) => item.id === action.payload.noteID
+      );
+      state.data[editedItemIndex] = action.payload.data;
+      state.error = "";
+      if (state.loading === "pending") state.loading = "idle";
+    },
     setError: (state, action) => {
       state.error = action.payload;
       if (state.loading === "pending") state.loading = "idle";
@@ -37,8 +45,14 @@ const noteSlice = createSlice({
   },
 });
 
-export const { setLoader, setData, setError, updateData, deleteRecord } =
-  noteSlice.actions;
+export const {
+  setLoader,
+  setData,
+  setError,
+  updateData,
+  deleteRecord,
+  editData,
+} = noteSlice.actions;
 
 export default noteSlice.reducer;
 
@@ -123,8 +137,7 @@ export const editNote =
       });
 
       if (request.ok) {
-        const response = await request.json();
-        dispatch(updateData(flattenResponse(response)));
+        dispatch(editData(data, noteID));
       } else {
         throw new Error({
           statusCode: request.status,

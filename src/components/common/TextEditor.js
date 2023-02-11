@@ -4,6 +4,7 @@ import Highlight from "@tiptap/extension-highlight";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useEffect } from "react";
 
 const TextEditor = ({ placeholder, onChange, ...rest }) => {
   // Rich Text Editor Config
@@ -20,6 +21,10 @@ const TextEditor = ({ placeholder, onChange, ...rest }) => {
       onChange({ content: editor.getHTML() });
     },
   });
+
+  useEffect(() => {
+    !editor?.isFocused && editor?.commands?.setContent(rest?.content);
+  }, [editor, onChange, rest.content]);
 
   return (
     <RichTextEditor editor={editor} style={{ minHeight: "200px" }} {...rest}>

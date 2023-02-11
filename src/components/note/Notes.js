@@ -30,7 +30,7 @@ const categories = [
   },
 ];
 
-const Notes = ({ notes, handleSideSheet, userID, accessToken }) => {
+const Notes = ({ notes, handleSideSheet, userID, accessToken, editNote }) => {
   const [filter, setFilter] = useState([]);
   const [data, setData] = useState(notes);
   const dispatch = useDispatch();
@@ -59,8 +59,6 @@ const Notes = ({ notes, handleSideSheet, userID, accessToken }) => {
   const handleDelete = (id) => {
     dispatch(deleteNote(id, userID, accessToken));
   };
-
-  // const handleEdit = (id) => {};
 
   return (
     <Box mt={30}>
@@ -108,6 +106,7 @@ const Notes = ({ notes, handleSideSheet, userID, accessToken }) => {
                   item={item}
                   index={index}
                   deleteNote={handleDelete}
+                  editNote={editNote}
                 />
               ))}
           </Grid>

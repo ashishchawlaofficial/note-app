@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Drawer, useMantineTheme } from "@mantine/core";
+import { Container, Drawer, useMantineTheme, ScrollArea } from "@mantine/core";
 import Layout from "../Layout/Layout";
 import Empty from "../common/Empty";
 import NewNote from "../note/NewNote";
@@ -10,6 +10,9 @@ import Notes from "../note/Notes";
 
 const Home = () => {
   const [opened, setOpened] = useState(false);
+  const [selectedNote, setSelectedNote] = useState([]);
+  const [editFlag, setEditFlag] = useState(false);
+  const [noteID, setNoteID] = useState(null);
   const theme = useMantineTheme();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -17,7 +20,15 @@ const Home = () => {
 
   useEffect(() => {
     user?.accessToken && dispatch(getData(user.uid, user.accessToken));
-  }, [user.uid, user.accessToken, dispatch, user]);
+  }, [user.uid, user.accessToken, dispatch, user, editFlag]);
+
+  const handleEdit = (id) => {
+    const note = data.filter((item) => item.id === id);
+    setSelectedNote(note);
+    setEditFlag(true);
+    setOpened(true);
+    setNoteID(id);
+  };
 
   console.log(data, loading, error);
 
@@ -32,6 +43,7 @@ const Home = () => {
             handleSideSheet={setOpened}
             userID={user.uid}
             accessToken={user.accessToken}
+            editNote={handleEdit}
           />
         )}
       </Container>
@@ -45,8 +57,23 @@ const Home = () => {
         opened={opened}
         onClose={() => setOpened(false)}
         position="right"
+        lockScroll={false}
       >
-        <NewNote handleSideSheet={setOpened} />
+        <ScrollArea.Autosize
+          maxHeight={"90vh"}
+          sx={{ maxWidth: "100%" }}
+          mx="auto"
+        >
+          <NewNote
+            handleSideSheet={setOpened}
+            editNote={handleEdit}
+            selectedNote={selectedNote}
+            shouldEdit={editFlag}
+            setShouldEdit={setEditFlag}
+            noteID={noteID}
+            setSelectedNote={setSelectedNote}
+          />
+        </ScrollArea.Autosize>
       </Drawer>
     </Layout>
   );

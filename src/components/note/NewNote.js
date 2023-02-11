@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { TextInput, Button, Stack, Box, Text, Select, Group, ActionIcon } from "@mantine/core";
 import { noteSchema } from "../../utils/YupSchema";
 import TextEditor from "../common/TextEditor";
-import { isEmptyObj } from "../../utils/Functions";
-import { postData, getData } from "../../store/slices/noteSlice";
+import { isEmptyArray, isEmptyObj } from "../../utils/Functions";
+import { postData, getData, editNote } from "../../store/slices/noteSlice";
 import { BsFillCircleFill, BsFillArrowRightCircleFill } from "react-icons/bs";
 import { notifyOnSave } from "../../utils/Notifications";
 
@@ -34,7 +34,14 @@ const categories = [
   },
 ];
 
-const NewNote = ({ handleSideSheet }) => {
+const NewNote = ({
+  handleSideSheet,
+  selectedNote,
+  shouldEdit,
+  noteID,
+  setShouldEdit,
+  setSelectedNote,
+}) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const dispatch = useDispatch();
   const userID = sessionStorage.getItem("userId");
@@ -63,14 +70,17 @@ const NewNote = ({ handleSideSheet }) => {
   ));
 
   const handleSubmit = (values) => {
-    console.log(values, form.values.category);
-    console.log(isEmptyObj(values));
-    if (!isEmptyObj(values)) {
-      dispatch(postData(values, userID, user.accessToken));
-      setIsSubmitted(true);
-      handleSideSheet(false);
-      form.reset();
+    if (shouldEdit && !isEmptyObj(values)) {
+      dispatch(editNote(noteID, values, userID, user.accessToken));
+      setShouldEdit(false);
     }
+    if (!shouldEdit && !isEmptyObj(values)) {
+      dispatch(postData(values, userID, user.accessToken));
+    }
+    setIsSubmitted(true);
+    handleSideSheet(false);
+    selectedNote([]);
+    form.reset();
   };
 
   useEffect(() => {
@@ -85,7 +95,15 @@ const NewNote = ({ handleSideSheet }) => {
 
   useEffect(() => {
     user?.accessToken && dispatch(getData(user.uid, user.accessToken));
-  }, [user.uid, user.accessToken, dispatch, user]);
+    setSelectedNote([]);
+  }, [user.uid, user.accessToken, dispatch, user, shouldEdit, setSelectedNote]);
+
+  useEffect(() => {
+    if (!isEmptyArray(selectedNote)) {
+      form.setValues(selectedNote[0]);
+    }
+  }, [selectedNote]); // eslint-disable-line react-hooks/exhaustive-deps
+  console.log(form.values);
 
   return (
     <Box>

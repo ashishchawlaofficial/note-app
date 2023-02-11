@@ -16,7 +16,7 @@ import { BsPencil, BsTrash } from "react-icons/bs";
 import { notifyOnSave } from "../../utils/Notifications";
 import { useSelector } from "react-redux";
 
-const SingleNote = ({ item, index, deleteNote }) => {
+const SingleNote = ({ item, index, deleteNote, editNote }) => {
   const [opened, setOpened] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const theme = useMantineTheme();
@@ -39,14 +39,14 @@ const SingleNote = ({ item, index, deleteNote }) => {
           title={item?.title}
           color={
             item?.category !== "Uncategorized"
-              ? item?.category.toLowerCase()
+              ? item?.category?.toLowerCase()
               : "gray"
           }
           sx={{ minHeight: "150px" }}
         >
           <div
             dangerouslySetInnerHTML={{
-              __html: contentShortner(item?.content, 150),
+              __html: item?.content && contentShortner(item?.content, 150),
             }}
           />
           <Box sx={{ position: "absolute", top: "10px", right: "10px" }}>
@@ -54,16 +54,17 @@ const SingleNote = ({ item, index, deleteNote }) => {
               <ActionIcon
                 color={
                   item?.category !== "Uncategorized"
-                    ? item?.category.toLowerCase()
+                    ? item?.category?.toLowerCase()
                     : "gray"
                 }
+                onClick={() => editNote(item.id)}
               >
                 <BsPencil size={18} />
               </ActionIcon>
               <ActionIcon
                 color={
                   item?.category !== "Uncategorized"
-                    ? item?.category.toLowerCase()
+                    ? item?.category?.toLowerCase()
                     : "gray"
                 }
                 onClick={() => setOpened(true)}
