@@ -10,7 +10,7 @@ This is a simple note taking app which lets users to create notes, write down id
 
 Please use below credentials to login into the application to see how it works.
 
-Username: demo@gmail.com\
+Username: demo@gmail.com
 
 Password: demo@123
 
